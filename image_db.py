@@ -53,10 +53,9 @@ class ImageDatabase:
         return Image.open(io.BytesIO(b64decode(self.load_row(name)['image'])))
 
 if (__name__ == '__main__'):
-    img = Image.open("static/camera.png").convert("RGBA")
-
     imagesDB = ImageDatabase('database.db')
     imagesDB.reset_table()
-    imagesDB.save_pil_image("camera", img)
-
-    db_img = imagesDB.load_pil_image("camera")
+    camera = Image.open("static/camera.png").convert("RGBA")
+    imagesDB.save_pil_image("camera", camera)
+    keypad = Image.open("static/keypad.png").convert("RGBA")
+    imagesDB.save_pil_image("keypad", keypad)
