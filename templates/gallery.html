@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>title</title>
+        <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/styles.css')}}">
+    </head>
+    <body>
+        <div id="images-div" style="width: 100vw; display: flex; align-items: center; flex-direction: column; justify-content: space-around;">
+            <button class="large-text" id="new-button">Add New</button>
+        </div>
+        <div class="overflow-div-outer" id="options-div">
+            <div class="overflow-div-inner">
+                <button class="medium-text" id="back-button">Back</button>
+            </div>
+        </div>
+    </body>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script>
+        $(document).ready(() => {
+            $.ajax({
+                type: "GET",
+                url: "/api/saved_images",
+                success: (res) => {
+                    res = JSON.parse(res)
+                    for (const row of res) {
+                        $('#images-div').append(`
+                        <div class="gallery-card flex column">
+                            <img src="/static/saved_images/${row}"/>
+                            <button id="delete-${row}" class="delete-button">Delete</button>
+                        </div>
+                        `);
+                    }
+                }
+            });
+        });
+
+        $(document).on('click', '.delete-button', (e) => {
+            $.ajax({
+                type: "DELETE",
+                url: "/api/saved_images",
+                data: JSON.stringify({'img': e.target.id.split('-')[1]}),
+                dataType: 'json',
+                contentType: 'application/json',
+                success: (res) => {
+                    console.log("Success");
+                    console.log(res);
+                    $(e.target).parent().remove();
+                },
+                error: (res) => {
+                    console.log("Error");
+                    console.log(res);
+                }
+            });
+        });
+
+        $('#new-button').on('click', (e) => {
+            location.href='/upload';
+        });
+
+        $('#back-button').on('click', (e) => {
+            location.href='/';
+        });
+
+        $('#file').on('change', (e) => {
+            $("label[for='file']").html("Thank you");
+            $("label[for='file']").css('background-color', getComputedStyle(document.documentElement).getPropertyValue('--good'));
+        });
+    </script>
+</html>

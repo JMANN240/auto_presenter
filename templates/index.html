@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>title</title>
+        <link rel="stylesheet" type="text/css" href="../static/css/styles.css">
+        <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/styles.css')}}">
+    </head>
+    <body>
+        <div id="videos-div" class="flex" style="width: 100vw;">
+            <img id="frames" class="stream" src="{{ url_for('video_feed') }}">
+            <img id="mask" class="stream" src="{{ url_for('video_feed_mask') }}" hidden>
+        </div>
+        <div class="overflow-div-outer wide neumorphic inset" id="images-div">
+            <div class="overflow-div-inner" id="images-div-inner">
+                <button class="options-button flex column small-text" id="arrow-button">Arrow</button>
+                <button class="options-button flex column small-text" id="save-button">Save</button>
+            </div>
+        </div>
+        <div class="overflow-div-outer wide neumorphic inset" id="options-div">
+            <div class="overflow-div-inner">
+                <button class="options-button flex column small-text" id="overlays-button">Overlays</button>
+                <button class="options-button flex column small-text" id="gallery-button">Gallery</button>
+                <button class="options-button flex column small-text" id="calibrate-button">Calibrate</button>
+                <button class="options-button flex column small-text" id="manual-variances-button">Show Variance Sliders</button>
+                <button class="options-button flex column small-text" id="toggle-mask-button">Toggle Mask</button>
+                <button class="options-button flex column small-text" id="shutdown-button">Shutdown</button>
+            </div>
+        </div>
+        <div id="slider-div" class="flex column wide neumorphic inset">
+            <h1 class="large-text">Variance</h1>
+            <label for="hue-variance" class="medium-text">Hue</label>
+            <input type="range" value="0" min="0" max="100" id="hue-variance" class="color-slider neumorphic">
+            <label for="saturation-variance" class="medium-text">Saturation</label>
+            <input type="range" value="0" min="0" max="100" id="saturation-variance" class="color-slider neumorphic">
+            <label for="value-variance" class="medium-text">Value</label>
+            <input type="range" value="0" min="0" max="100" id="value-variance" class="color-slider neumorphic">
+        </div>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script>
+            $(document).ready(() => {
+                $.ajax({
+                    type: "GET",
+                    url: "/api/images",
+                    success: (res) => {
+                        res = JSON.parse(res)
+                        res.reverse();
+                        for (const row of res) {
+                            $('#images-div-inner').prepend(`
+                                <button class="options-button flex column small-text overlay-image-button" style="background-position: center center; background-repeat: no-repeat;background-size: contain; background-image: url('data:image/png;base64,${row.image}')" id="${row.name}">${row.name}</button>
+                            `);
+                        }
+                    }
+                });
+            });
+
+            $(document).on('click', '.overlay-image-button', (e) => {
+                console.log(e);
+                $.ajax({
+                    type: "POST",
+                    url: `/api/overlay/image/${e.target.id}`
+                });
+            });
+
+            $('.color-slider').on('input', (e) => {
+                $.ajax({
+                    type: "POST",
+                    url: "/api/set-color",
+                    data: JSON.stringify({'element': $(e.target).attr('id').split('-')[0], 'value': $(e.target).val()}),
+                    dataType: 'json',
+                    contentType: 'application/json'
+                });
+            });
+
+            $('#overlays-button').on('click', (e) => {
+                location.href='/overlays';
+            });
+
+            $('#gallery-button').on('click', (e) => {
+                location.href='/gallery';
+            });
+
+            $('#shutdown-button').on('click', (e) => {
+                $.ajax({
+                    type: "POST",
+                    url: "/api/shutdown"
+                });
+            });
+
+            $('#toggle-tracking-button').on('click', (e) => {
+                $.ajax({
+                    type: "POST",
+                    url: "/api/toggle-tracking"
+                });
+            });
+
+            $('#arrow-button').on('click', (e) => {
+                $.ajax({
+                    type: "POST",
+                    url: "/api/overlay/arrow"
+                });
+            });
+
+            $('#save-button').on('click', (e) => {
+                $.ajax({
+                    type: "POST",
+                    url: "/api/overlay/save"
+                });
+            });
+
+            $('#calibrate-button').on('click', (e) => {
+                $.ajax({
+                    type: "POST",
+                    url: "/api/calibrate",
+                    success: (res) => {
+                        slider_values = res.slice(1, -1).split(' ').map(x=>parseInt(x));
+                        console.log(slider_values);
+                        $('#hue-variance').val(slider_values[0]);
+                        $('#saturation-variance').val(slider_values[1]);
+                        $('#value-variance').val(slider_values[2]);
+                    }
+                });
+            });
+
+            $('#toggle-mask-button').on('click', (e) => {
+                $('.stream').toggle();
+            });
+
+            $('#manual-variances-button').on('click', (e) => {
+                console.log($('#slider-div').css("display"));
+                if ($('#slider-div').css("display") == "none") {
+                    $('#slider-div').css("display", "flex");
+                } else if ($('#slider-div').css("display") == "flex") {
+                    $('#slider-div').css("display", "none");
+                }
+            });
+        </script>
+    </body>
+</html>

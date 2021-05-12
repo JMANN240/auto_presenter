@@ -1,0 +1,13 @@
+Adafruit-GPIO==1.0.3
+Adafruit-PCA9685==1.0.1
+Adafruit-PureIO==1.1.8
+click==7.1.2
+Flask==1.1.2
+imutils==0.5.4
+itsdangerous==1.1.0
+Jinja2==2.11.3
+MarkupSafe==1.1.1
+numpy==1.20.2
+opencv-contrib-python==4.5.1.48
+Pillow==8.2.0
+Werkzeug==1.0.1

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>title</title>
+        <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/styles.css')}}">
+    </head>
+    <body>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="flash-message">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <form action="/api/images" enctype='multipart/form-data' method="POST" class="flex column" style="width: 90vw; justify-content: space-around;">
+            <label class="medium-text" for="name">Overlay Name</label>
+            <input type="text" style="width: 90vw;" class="medium-text" id="name" name="name" required>
+            <label class="medium-text" style="border: 1px solid black;" for="file">File Please</label>
+            <input type="file" id="file" name="file" accept=".png" style="display: none;" required>
+            <label class="medium-text" for="description">Overlay Description</label>
+            <textarea id="description" style="width: 90vw;" class="small-text" name="description" required></textarea>
+            <label class="medium-text" for="submit" style="border: 1px solid black;">Submit</label>
+            <input id="submit" type="submit" style="display: none;">
+        </form>
+        <div class="overflow-div-outer" id="options-div">
+            <div class="overflow-div-inner">
+                <button class="medium-text" id="back-button">Back</button>
+            </div>
+        </div>
+    </body>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script>
+        $('#back-button').on('click', (e) => {
+            location.href='/gallery';
+        });
+
+        $('#file').on('change', (e) => {
+            $("label[for='file']").html("Thank you");
+            $("label[for='file']").css('background-color', getComputedStyle(document.documentElement).getPropertyValue('--good'));
+        });
+    </script>
+</html>
