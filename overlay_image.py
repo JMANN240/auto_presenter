@@ -23,7 +23,7 @@ class Overlay:
     def __init__(self):
         self.overlays = []
         self.components = {}
-        self.font = ImageFont.truetype("static\Roboto-Regular.ttf", 24)
+        self.font = ImageFont.truetype("static/Roboto-Regular.ttf", 24)
     
     def clear(self):
         self.overlays = []
