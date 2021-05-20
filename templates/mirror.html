@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>title</title>
+        <link rel="stylesheet" type="text/css" href="../static/css/styles.css">
+        <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/styles.css')}}">
+    </head>
+    <body>
+        <div id="videos-div" class="flex" style="width: 100vw;">
+            <img id="frames" class="stream" src="{{ url_for('video_feed') }}">
+        </div>
+    </body>
+</html>
