@@ -1,23 +1,20 @@
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, request
 import cv2
-import imutils
-import sys
 from imutils.video import VideoStream
 import time
 import threading
+import platform
 import os
 import numpy as np
 
-onpi = os.uname()[1] == 'raspberrypi'
+onpi = platform.system() == 'Linux'
 
 if onpi:
     from picamera.array import PiRGBArray
     from picamera import PiCamera
-
-if onpi:
     camera = PiCamera()
     resolution = (480, 368)
-    framerate = 30
+    framerate = 10
     camera.resolution = resolution
     camera.framerate = framerate
     rawCapture = PiRGBArray(camera, size=resolution)
@@ -27,12 +24,11 @@ else:
     frame = np.zeros((int(camera.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(camera.get(cv2.CAP_PROP_FRAME_WIDTH)), 3), np.uint8)
 
 running = True
-tracking = True
 
 def getFrame():
     global camera, frame, running, onpi
     if onpi:
-        global rawCapture
+        #global rawCapture
         for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
             frame = f.array
             rawCapture.truncate(0)
@@ -40,7 +36,7 @@ def getFrame():
                 break
     else:
         while running:
-            success, frame = camera.read()
+            _, frame = camera.read()
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -53,7 +49,7 @@ def index():
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/shutdown', methods=['POST'])
+@app.route('/shutdown')
 def shutdown():
     global running
     running = False
@@ -68,7 +64,7 @@ def gen_frames():
         buffer = prebuf.tobytes()
         yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + buffer + b'\r\n')  # concat frame one by one and show result
-        time.sleep(1/30)
+        time.sleep(1/5)
 
 getFrameThread = threading.Thread(target=getFrame)
 getFrameThread.name = "get frame"
