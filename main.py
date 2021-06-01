@@ -15,6 +15,8 @@ import sqlite3
 from base64 import b64decode, b64encode
 from overlay_image import Overlay
 import Adafruit_PCA9685
+import platform
+from servo import Servo
 
 
 # Servo stuff
@@ -22,24 +24,30 @@ import Adafruit_PCA9685
 servo_enabled = True
 
 try:
-    pwm = Adafruit_PCA9685.PCA9685()
+    servo = Servo()
 except:
     servo_enabled = False
 
-accuracy_threshold = 10
-
-t_angle = 150
-t_min = 150
-t_max = 650
-
-p_angle = 150
-p_min = 150
-p_max = 1150
+accuracy_threshold = 40
 
 #Opencv stuff
 
-camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-frame = np.zeros((int(camera.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(camera.get(cv2.CAP_PROP_FRAME_WIDTH)), 3), np.uint8)
+onpi = platform.system() == 'Linux'
+
+if onpi:
+    from picamera.array import PiRGBArray
+    from picamera import PiCamera
+    camera = PiCamera()
+    resolution = (480, 368)
+    framerate = 30
+    camera.resolution = resolution
+    camera.framerate = framerate
+    rawCapture = PiRGBArray(camera, size=resolution)
+    frame = np.zeros((resolution[1], resolution[0], 3), np.uint8)
+else:
+    camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+    frame = np.zeros((int(camera.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(camera.get(cv2.CAP_PROP_FRAME_WIDTH)), 3), np.uint8)
+
 running = True
 tracking = True
 focus = (0, 0)
@@ -47,11 +55,13 @@ scale = 0
 radius = 0
 
 avg_hsv = np.array((0,0,0))
-var_hsv = np.array((0,0,0))
+var_hsv = np.array((20,50,100))
 
 show_calibration_circle = True
-calibration_radius = 100
+calibration_radius = int(min(resolution[0], resolution[1]) * 0.25)
 calibrating = False
+calibrated = False
+move_amount = 10
 calibration_progress = 0
 overlay = Overlay()
 
@@ -64,16 +74,22 @@ def generateMask(f):
     return mask
 
 def getFrame():
-    global camera, frame, running
-    while running:
-        success, frame = camera.read()
+    global camera, frame, running, onpi
+    if onpi:
+        for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+            frame = f.array
+            rawCapture.truncate(0)
+            if not running:
+                break
+    else:
+        while running:
+            _, frame = camera.read()
 
-def showFrame():
-    global frame, running, focus, radius, scale
+def processFrame():
+    global focus, radius, scale, angle
     while running:
-        f = np.copy(frame)
-        mask = generateMask(f)
-        cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        mask = generateMask(frame)
+        cnts = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = imutils.grab_contours(cnts)
         if len(cnts) > 0:
             c = max(cnts, key=cv2.contourArea)
@@ -81,18 +97,15 @@ def showFrame():
             M = cv2.moments(c)
             focus = (int(x), int(y))
             scale = radius*2
-            cv2.circle(f, (int(x), int(y)), int(radius), (0, 255, 255), 2)
-            if tracking and servo_enabled:
-                if (focus[0] < int(f.shape[1]/2) - accuracy_threshold):
-                    pass
-                elif (focus[0] > int(f.shape[1]/2) + accuracy_threshold):
-                    pass
-                if (focus[1] < int(f.shape[0]/2) - accuracy_threshold):
-                    pass
-                elif (focus[1] > int(f.shape[0]/2) + accuracy_threshold):
-                    pass
-        cv2.circle(f, focus, 5, (0, 0, 255), -1)
-        cv2.circle(f,(int(f.shape[1]/2),int(f.shape[0]/2)),100,(0,0,255),3)
+            if tracking and servo_enabled and calibrated:
+                if (focus[0] < int(frame.shape[1]/2) - accuracy_threshold):
+                    servo.moveLeft(move_amount)
+                elif (focus[0] > int(frame.shape[1]/2) + accuracy_threshold):
+                    servo.moveRight(move_amount)
+                if (focus[1] < int(frame.shape[0]/2) - accuracy_threshold):
+                    servo.moveUp(move_amount)
+                elif (focus[1] > int(frame.shape[0]/2) + accuracy_threshold):
+                    servo.moveDown(move_amount)
         
 
 
@@ -183,6 +196,11 @@ def video_feed():
 def video_feed_mask():
     return Response(gen_masks(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route('/api/reset-servos', methods=["POST"])
+def reset_servos():
+    servo.reset()
+    return "200"
+
 @app.route('/api/overlay/image/<img>', methods=["POST"])
 def overlay_image(img):
     global overlay, imdb, focus, radius
@@ -214,45 +232,24 @@ def set_color():
         var_hsv[2] = int(request.json['value'])
     return "200"
 
+circle_img = np.zeros((frame.shape[0],frame.shape[1]), np.uint8)
+cv2.circle(circle_img,(int(frame.shape[1]/2),int(frame.shape[0]/2)),100,(255,255,255),-1)
+
 @app.route('/api/calibrate', methods=["POST"])
 def calibrate():
-    global show_calibration_circle, var_hsv, avg_hsv, calibrating, calibration_progress
-    show_calibration_circle = not show_calibration_circle
-    if not show_calibration_circle:
+    global show_calibration_circle, var_hsv, avg_hsv, calibrating, calibration_progress, angle, calibrated
+    if show_calibration_circle:
+        calibration_progress = 0
+        angle = 0
         calibrating = True
-        circle_img = np.zeros((frame.shape[0],frame.shape[1]), np.uint8)
-        cv2.circle(circle_img,(int(frame.shape[1]/2),int(frame.shape[0]/2)),100,(255,255,255),-1)
         frame_to_thresh = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         avg_hsv = np.array(cv2.mean(frame_to_thresh, mask=circle_img)[:3])
-        prev_best = 0
-        prev_best_in = 0
-        prev_best_out = 1
-        for hv in range(0, 101, 10):
-            for sv in range(0, 101, 10):
-                for vv in range(0, 101, 10):
-                    test_var_hsv = np.array((hv, sv, vv))
-                    thresh = cv2.inRange(frame_to_thresh, avg_hsv-test_var_hsv, avg_hsv+test_var_hsv)
-                    
-                    in_mask = (thresh/255)*(circle_img/255)*255
-                    out_mask = (thresh/255)*(((circle_img/255)-1)*(-1))*255
-
-                    in_sum = np.sum(in_mask/255)
-                    out_sum = np.sum(out_mask/255)
-
-                    total_area = frame.shape[1] * frame.shape[0]
-                    in_area = np.pi * (calibration_radius ** 2)
-                    out_area = total_area - in_area
-
-                    in_ratio = round(in_sum/in_area, 3)
-                    out_ratio = round(out_sum/out_area, 3)
-
-                    if out_ratio != 0 and in_ratio/out_ratio > prev_best and in_ratio > 0.8 and out_ratio < 0.1:
-                        prev_best = in_ratio/out_ratio
-                        var_hsv = test_var_hsv
-                    calibration_progress+=1
-    calibrating = False
-    calibration_progress=0
-    return str(var_hsv)
+        calibrating = False
+        calibrated = True
+    else:
+        calibrated = False
+    show_calibration_circle = not show_calibration_circle
+    return "200"
 
 @app.route('/api/toggle-tracking', methods=['POST'])
 def toggle_tracking():
@@ -269,16 +266,17 @@ def shutdown():
     return "200"
 
 def gen_frames():
-    global frame, running, show_calibration_circle, calibrating, calibration_progress
-    angle = 0
+    global frame, running, show_calibration_circle, calibrating, calibration_progress, angle
     while running:
-        f = np.copy(frame)
+        f = frame.copy()
+        cv2.circle(f, focus, int(radius), (0, 255, 255), 2)
+        cv2.circle(f, focus, 5, (0, 0, 255), -1)
         if show_calibration_circle:
             cv2.circle(f,(int(f.shape[1]/2),int(f.shape[0]/2)),calibration_radius,(0,0,255),3)
         if calibrating:
             cv2.ellipse(f, (int(f.shape[1]/2),int(f.shape[0]/2)), (calibration_radius, calibration_radius), angle%360, 0, calibration_progress/1331*360, (0,255,0), 3)
             angle+=10
-        cv2.circle(f, focus, 5, (0, 0, 255), -1)
+        cv2.rectangle(f, (int(f.shape[1]/2-accuracy_threshold),int(f.shape[0]/2-accuracy_threshold)), (int(f.shape[1]/2+accuracy_threshold),int(f.shape[0]/2+accuracy_threshold)), (0,255,0), 3)
         ret, prebuf = cv2.imencode('.jpg', f)
         buffer = prebuf.tobytes()
         time.sleep(1/30)
@@ -298,10 +296,10 @@ def gen_masks():
 getFrameThread = threading.Thread(target=getFrame)
 getFrameThread.name = "get frame"
 
-showFrameThread = threading.Thread(target=showFrame)
-showFrameThread.name = "show frame"
+processFrameThread = threading.Thread(target=processFrame)
+processFrameThread.name = "process frame"
 
-serverThread = threading.Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 80})
+serverThread = threading.Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 8000})
 serverThread.name = "server"
 
 if __name__ == "__main__":
@@ -309,9 +307,9 @@ if __name__ == "__main__":
         app.run(debug=True)
     else:
         getFrameThread.start()
-        showFrameThread.start()
+        processFrameThread.start()
         serverThread.start()
         getFrameThread.join()
-        showFrameThread.join()
+        processFrameThread.join()
         serverThread.join()
         cv2.destroyAllWindows()
