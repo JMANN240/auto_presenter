@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>title</title>
+        <title>AutoPrez</title>
         <link rel="stylesheet" type="text/css" href="../static/css/styles.css">
         <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/styles.css')}}">
     </head>
@@ -37,7 +37,7 @@
             <label for="value-variance" class="medium-text">Value</label>
             <input type="range" value="100" min="0" max="100" id="value-variance" class="color-slider neumorphic">
         </div>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script src="{{url_for('static', filename='js/jquery-3.6.0.js')}}"></script>
         <script>
             $(document).ready(() => {
                 $.ajax({
