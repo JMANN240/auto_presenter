@@ -21,6 +21,7 @@
             <div class="overflow-div-inner">
                 <button class="options-button flex column small-text" id="overlays-button">Overlays</button>
                 <button class="options-button flex column small-text" id="gallery-button">Gallery</button>
+                <button class="options-button flex column small-text" id="reset-servos-button">Reset Servos</button>
                 <button class="options-button flex column small-text" id="calibrate-button">Calibrate</button>
                 <button class="options-button flex column small-text" id="manual-variances-button">Show Variance Sliders</button>
                 <button class="options-button flex column small-text" id="toggle-mask-button">Toggle Mask</button>
@@ -30,11 +31,11 @@
         <div id="slider-div" class="flex column wide neumorphic inset">
             <h1 class="large-text">Variance</h1>
             <label for="hue-variance" class="medium-text">Hue</label>
-            <input type="range" value="0" min="0" max="100" id="hue-variance" class="color-slider neumorphic">
+            <input type="range" value="20" min="0" max="100" id="hue-variance" class="color-slider neumorphic">
             <label for="saturation-variance" class="medium-text">Saturation</label>
-            <input type="range" value="0" min="0" max="100" id="saturation-variance" class="color-slider neumorphic">
+            <input type="range" value="50" min="0" max="100" id="saturation-variance" class="color-slider neumorphic">
             <label for="value-variance" class="medium-text">Value</label>
-            <input type="range" value="0" min="0" max="100" id="value-variance" class="color-slider neumorphic">
+            <input type="range" value="100" min="0" max="100" id="value-variance" class="color-slider neumorphic">
         </div>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
         <script>
@@ -101,6 +102,13 @@
                 });
             });
 
+            $('#reset-servos-button').on('click', (e) => {
+                $.ajax({
+                    type: "POST",
+                    url: "/api/reset-servos"
+                });
+            });
+
             $('#save-button').on('click', (e) => {
                 $.ajax({
                     type: "POST",
@@ -113,11 +121,13 @@
                     type: "POST",
                     url: "/api/calibrate",
                     success: (res) => {
-                        slider_values = res.slice(1, -1).split(' ').map(x=>parseInt(x));
-                        console.log(slider_values);
-                        $('#hue-variance').val(slider_values[0]);
-                        $('#saturation-variance').val(slider_values[1]);
-                        $('#value-variance').val(slider_values[2]);
+                        if (res != "200") {
+                            slider_values = res.slice(1, -1).split(' ').map(x=>parseInt(x));
+                            console.log(slider_values);
+                            $('#hue-variance').val(slider_values[0]);
+                            $('#saturation-variance').val(slider_values[1]);
+                            $('#value-variance').val(slider_values[2]);
+                        }
                     }
                 });
             });

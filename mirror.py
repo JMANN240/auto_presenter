@@ -14,7 +14,7 @@ if onpi:
     from picamera import PiCamera
     camera = PiCamera()
     resolution = (480, 368)
-    framerate = 10
+    framerate = 30
     camera.resolution = resolution
     camera.framerate = framerate
     rawCapture = PiRGBArray(camera, size=resolution)
@@ -64,12 +64,12 @@ def gen_frames():
         buffer = prebuf.tobytes()
         yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + buffer + b'\r\n')  # concat frame one by one and show result
-        time.sleep(1/5)
+        time.sleep(1/framerate)
 
 getFrameThread = threading.Thread(target=getFrame)
 getFrameThread.name = "get frame"
 
-serverThread = threading.Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 8050})
+serverThread = threading.Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 8000})
 serverThread.name = "server"
 
 if __name__ == "__main__":
