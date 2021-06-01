@@ -56,7 +56,7 @@ server {
 
 And the systemd configuration should be located in /etc/systemd/system and should contain something similar to
 
-```toml
+```
 [Unit]
 Description=AutoPrez Service
 After=network.target
