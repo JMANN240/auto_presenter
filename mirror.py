@@ -49,7 +49,7 @@ def index():
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/shutdown')
+@app.route('/shutdown', methods=['POST'])
 def shutdown():
     global running
     running = False

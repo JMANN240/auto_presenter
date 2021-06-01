@@ -2,13 +2,26 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>title</title>
-        <link rel="stylesheet" type="text/css" href="../static/css/styles.css">
+        <title>Mirror</title>
         <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/styles.css')}}">
     </head>
     <body>
         <div id="videos-div" class="flex" style="width: 100vw;">
             <img id="frames" class="stream" src="{{ url_for('video_feed') }}">
         </div>
+        <div class="overflow-div-outer wide neumorphic inset" id="options-div">
+            <div class="overflow-div-inner">
+                <button class="options-button flex column small-text" id="shutdown-button">Shutdown</button>
+            </div>
+        </div>
+        <script src="{{url_for('static', filename='js/jquery-3.6.0.js')}}"></script>
+        <script>
+            $('#shutdown-button').on('click', (e) => {
+                $.ajax({
+                    type: "POST",
+                    url: "/shutdown"
+                });
+            });
+        </script>
     </body>
 </html>

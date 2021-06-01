@@ -36,3 +36,19 @@ class Servo:
         self.vangle = sum(self.vrange)//len(self.vrange)
         self.hangle = sum(self.hrange)//len(self.hrange)
         self.update()
+
+if __name__ == '__main__':
+    from time import sleep
+    s = Servo()
+    s.moveLeft()
+    sleep(0.5)
+    s.reset()
+    s.moveRight()
+    sleep(0.5)
+    s.reset()
+    s.moveDown()
+    sleep(0.5)
+    s.reset()
+    s.moveUp()
+    sleep(0.5)
+    s.reset()
