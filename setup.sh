@@ -109,6 +109,3 @@ wpa_passphrase=razzledazzle
 wpa_key_mgmt=WPA-PSK
 wpa_pairwise=TKIP
 rsn_pairwise=CCMP" > /etc/hostapd/hostapd.conf
-
-#  Reboot
-sudo systemctl reboot
