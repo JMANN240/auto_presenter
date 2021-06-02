@@ -22,6 +22,9 @@ source env/bin/activate
 python3 -m pip install --upgrade pip
 python3 -m pip install -r requirements.txt
 
+#  Setting up image database
+python3 image_db.py
+
 #  Creating nginx server block and enabling it
 sudo rm /etc/nginx/sites-enabled/default
 sudo echo "server {
