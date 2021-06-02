@@ -23,6 +23,7 @@ python3 -m pip install --upgrade pip
 python3 -m pip install -r requirements.txt
 
 #  Creating nginx server block and enabling it
+sudo rm /etc/nginx/sites-enabled/default
 sudo echo "server {
     listen 80;
     server_name _;
