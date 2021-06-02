@@ -131,7 +131,7 @@ def gallery():
 
 @app.route('/upload')
 def upload():
-    return render_template('upload_image.html')
+    return render_template('upload_overlay.html')
 
 
 # API routes
