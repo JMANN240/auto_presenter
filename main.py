@@ -3,20 +3,24 @@ from werkzeug.utils import secure_filename
 import cv2
 import imutils
 import sys
-from imutils.video import VideoStream
 import time
 import threading
 import os
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 import json
 from image_db import ImageDatabase
 import sqlite3
-from base64 import b64decode, b64encode
+from base64 import b64encode
 from overlay_image import Overlay
-import Adafruit_PCA9685
 import platform
 from servo import Servo
+
+# Configuration Variables
+
+# Servo
+accuracy_threshold = 40
+move_amount = 10
 
 
 # Servo stuff
@@ -27,8 +31,6 @@ try:
     servo = Servo()
 except:
     servo_enabled = False
-
-accuracy_threshold = 40
 
 #Opencv stuff
 
@@ -57,12 +59,8 @@ radius = 0
 avg_hsv = np.array((0,0,0))
 var_hsv = np.array((20,50,100))
 
-show_calibration_circle = True
-calibration_radius = int(min(resolution[0], resolution[1]) * 0.25)
-calibrating = False
+calibration_radius = int(min(frame.shape[0], frame.shape[1]) * 0.25)
 calibrated = False
-move_amount = 10
-calibration_progress = 0
 overlay = Overlay()
 
 def generateMask(f):
@@ -74,7 +72,7 @@ def generateMask(f):
     return mask
 
 def getFrame():
-    global camera, frame, running, onpi
+    global frame
     if onpi:
         for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
             frame = f.array
@@ -86,7 +84,7 @@ def getFrame():
             _, frame = camera.read()
 
 def processFrame():
-    global focus, radius, scale, angle
+    global focus, radius, scale
     while running:
         mask = generateMask(frame)
         cnts = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -158,7 +156,7 @@ def api_images():
             else:
                 flash(str(e))
             return redirect("/upload")
-        return redirect("/gallery")
+        return redirect("/")
     
     elif request.method == 'DELETE':
         img = request.json.get('img')
@@ -203,19 +201,16 @@ def reset_servos():
 
 @app.route('/api/overlay/image/<img>', methods=["POST"])
 def overlay_image(img):
-    global overlay, imdb, focus, radius
     overlay.image(img, imdb, focus, 4*radius)
     return "200"
 
 @app.route('/api/overlay/arrow', methods=["POST"])
 def overlay_arrow():
-    global overlay, focus
     overlay.arrow(focus)
     return "200"
 
 @app.route('/api/overlay/save', methods=["POST"])
 def save_overlay():
-    global overlay, frame
     frame_image = Image.fromarray(np.flip(frame, 2))
     overlay.draw(frame_image).save(f"static/saved_images/{round(time.time())}.png")
     overlay.clear()
@@ -237,18 +232,13 @@ cv2.circle(circle_img,(int(frame.shape[1]/2),int(frame.shape[0]/2)),100,(255,255
 
 @app.route('/api/calibrate', methods=["POST"])
 def calibrate():
-    global show_calibration_circle, var_hsv, avg_hsv, calibrating, calibration_progress, angle, calibrated
-    if show_calibration_circle:
-        calibration_progress = 0
-        angle = 0
-        calibrating = True
+    global avg_hsv, calibrated
+    if not calibrated:
         frame_to_thresh = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         avg_hsv = np.array(cv2.mean(frame_to_thresh, mask=circle_img)[:3])
-        calibrating = False
         calibrated = True
     else:
         calibrated = False
-    show_calibration_circle = not show_calibration_circle
     return "200"
 
 @app.route('/api/toggle-tracking', methods=['POST'])
@@ -261,37 +251,32 @@ def toggle_tracking():
 def shutdown():
     global running
     running = False
-    func = request.environ.get('werkzeug.server.shutdown')
-    func()
+    request.environ.get('werkzeug.server.shutdown')()
     return "200"
 
 def gen_frames():
-    global frame, running, show_calibration_circle, calibrating, calibration_progress, angle
     while running:
         f = frame.copy()
         cv2.circle(f, focus, int(radius), (0, 255, 255), 2)
         cv2.circle(f, focus, 5, (0, 0, 255), -1)
-        if show_calibration_circle:
+        if not calibrated:
             cv2.circle(f,(int(f.shape[1]/2),int(f.shape[0]/2)),calibration_radius,(0,0,255),3)
-        if calibrating:
-            cv2.ellipse(f, (int(f.shape[1]/2),int(f.shape[0]/2)), (calibration_radius, calibration_radius), angle%360, 0, calibration_progress/1331*360, (0,255,0), 3)
-            angle+=10
-        cv2.rectangle(f, (int(f.shape[1]/2-accuracy_threshold),int(f.shape[0]/2-accuracy_threshold)), (int(f.shape[1]/2+accuracy_threshold),int(f.shape[0]/2+accuracy_threshold)), (0,255,0), 3)
+        cv2.rectangle(f, (int(f.shape[1]/2-accuracy_threshold),int(f.shape[0]/2-accuracy_threshold)), (int(f.shape[1]/2+accuracy_threshold),int(f.shape[0]/2+accuracy_threshold)), (0,255,0), 1)
         ret, prebuf = cv2.imencode('.jpg', f)
         buffer = prebuf.tobytes()
-        time.sleep(1/30)
         yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + buffer + b'\r\n')  # concat frame one by one and show result
+        time.sleep(1/30)
 
 def gen_masks():
     global frame, running
     while running:
         mask = generateMask(frame)
-        ret, prebuf = cv2.imencode('.jpg', mask)
+        _, prebuf = cv2.imencode('.jpg', mask)
         buffer = prebuf.tobytes()
-        time.sleep(1/30)
         yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + buffer + b'\r\n')  # concat frame one by one and show result
+        time.sleep(1/30)
 
 getFrameThread = threading.Thread(target=getFrame)
 getFrameThread.name = "get frame"

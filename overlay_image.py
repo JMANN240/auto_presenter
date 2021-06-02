@@ -17,7 +17,20 @@ def drawWrappedText(image, text, bbox, font):
                 break
             test_line = word + " "
         line = test_line
-    draw.text((bbox[0], bbox[1] + offset), line, font=font, fill=(0,0,0))
+    else:
+        draw.text((bbox[0], bbox[1] + offset), line, font=font, fill=(0,0,0))
+
+def getWrappedTextHeight(image, text, width, font):
+    draw = ImageDraw.Draw(image)
+    test_line = ""
+    text_height = draw.textsize(text, font=font)[1]
+    offset = 0
+    for word in text.split(" "):
+        test_line += word + " "
+        if (draw.textlength(test_line, font=font) > width):
+            offset += text_height
+            test_line = word + " "
+    return offset + text_height
 
 class Overlay:
     def __init__(self):
@@ -43,12 +56,16 @@ class Overlay:
     
     def draw(self, base):
         temp = base.copy()
-        base = Image.new(mode="RGB", size=(temp.size[0], 2*(temp.size[1])), color=(255,255,255))
+        text_height = 0
+        for i, component in enumerate(self.components.items()):
+            test_height = getWrappedTextHeight(base, f"{component[1][1]}x {component[0]}: {component[1][0]}", int(temp.size[0]/len(self.components.items())), self.font)
+            text_height = max(text_height, test_height)
+        base = Image.new(mode="RGB", size=(temp.size[0], temp.size[1] + text_height), color=(255,255,255))
         base.paste(temp, (0,0))
         for overlay in self.overlays:
             overlay.draw(base)
         for i, component in enumerate(self.components.items()):
-            drawWrappedText(base, f"{component[1][1]}x {component[0]}: {component[1][0]}", (int(i*temp.size[0]/len(self.components.items())), temp.size[1], int(temp.size[0]/len(self.components.items())), temp.size[1]), self.font)
+            drawWrappedText(base, f"{component[1][1]}x {component[0]}: {component[1][0]}", (int(i*temp.size[0]/len(self.components.items())), temp.size[1], int(temp.size[0]/len(self.components.items())), text_height), self.font)
         return base
 
 class OverlayImage:
