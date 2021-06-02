@@ -49,6 +49,7 @@ After=network.target
 [Service]
 User=root
 WorkingDirectory=/home/pi/auto_presenter
+ExecStartPre=/bin/sleep 5
 ExecStart=/home/pi/auto_presenter/env/bin/python main.py
 Restart=on-failure
 RestartSec=10
