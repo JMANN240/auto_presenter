@@ -37,6 +37,8 @@ Finally, image_db.py will need to be run to set up the database for uploading an
 
 It is recommended to use Nginx as a reverse proxy to serve the web interface, systemd to autostart the python script, and hostapd/dnsmasq to serve an access point/route connections ([more here](https://www.raspberrypi.org/documentation/configuration/wireless/access-point-routed.md))
 
+#### *Note: make sure to substitute any eth0 with wlan1 if you plan on using a second wireless interface rather than ethernet*
+
 The Nginx configuration file should be located in /etc/nginx/sites-enabled and should contain something similar to 
 
 ```nginx
@@ -64,6 +66,7 @@ After=network.target
 [Service]
 User=root
 WorkingDirectory=/path/to/auto_presenter
+ExecStartPre=/bin/sleep 5
 ExecStart=/path/to/python/interpreter main.py
 Restart=on-failure
 RestartSec=10
