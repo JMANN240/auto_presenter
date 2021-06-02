@@ -13,9 +13,11 @@ sudo apt-get -y install libjasper-dev
 
 #  Creating python virtual environment
 python3 -m venv env
+sleep 1
 source env/bin/activate
 
 #  Installing pip requirements
+pip install --upgrade pip
 pip install -r requirements.txt
 
 #  Creating nginx server block and enabling it
