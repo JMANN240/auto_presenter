@@ -78,6 +78,13 @@ $('#gallery-button').on('click', (e) => {
     location.href='/gallery';
 });
 
+$('#toggle-tracking-button').on('click', (e) => {
+    $.ajax({
+        type: "POST",
+        url: "/api/toggle-tracking"
+    });
+});
+
 $('#reset-servos-button').on('click', (e) => {
     $.ajax({
         type: "POST",
