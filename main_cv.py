@@ -31,11 +31,11 @@ def processFrame():
             settings.focus = (int(x), int(y))
             settings.scale = settings.radius*2
             if settings.tracking and settings.servo.enabled and settings.calibrated:
-                if (settings.focus[0] < int(settings.frame.shape[1]/2) - int(settings.frame.shape[1]/2*settings.target_square_size/2)):
+                if (settings.focus[0] < int(settings.frame.shape[1]/2) - int(settings.target_square_size/2)):
                     settings.servo.moveLeft(settings.move_amount)
-                elif (settings.focus[0] > int(settings.frame.shape[1]/2) + int(settings.frame.shape[1]/2*settings.target_square_size/2)):
+                elif (settings.focus[0] > int(settings.frame.shape[1]/2) + int(settings.target_square_size/2)):
                     settings.servo.moveRight(settings.move_amount)
-                if (settings.focus[1] < int(settings.frame.shape[0]/2) - int(settings.frame.shape[0]/2*settings.target_square_size/2)):
+                if (settings.focus[1] < int(settings.frame.shape[0]/2) - int(settings.target_square_size/2)):
                     settings.servo.moveUp(settings.move_amount)
-                elif (settings.focus[1] > int(settings.frame.shape[0]/2) + int(settings.frame.shape[0]/2*settings.target_square_size/2)):
+                elif (settings.focus[1] > int(settings.frame.shape[0]/2) + int(settings.target_square_size/2)):
                     settings.servo.moveDown(settings.move_amount)
