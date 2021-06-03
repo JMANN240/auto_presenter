@@ -8,7 +8,15 @@ AutoPrez is used to generate presentation images automatically. It is fully cust
 
 ## Pertinent Files
 
-### - main.py: The main file that will be run, has all features (tracking, servo control, serving, etc.).
+### - main.py: The main file that will be run. Brings together subfiles listed below.
+
+- main_flask.py: App setup and utility functions
+- main_flask_public.py: Public routes
+- main_flask_api.py: API routes
+- main_cv.py: OpenCV functions
+- main_globals.py: Global variables
+
+### - main_full.py: Like main.py but has all features (tracking, servo control, serving, etc.) rather than having them split up.
 
 ### - mirror.py: A minimal webserver/camera application to mirror what the camera sees to the client device.
 
