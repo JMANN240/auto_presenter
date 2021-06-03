@@ -3,13 +3,14 @@
     <head>
         <meta charset="UTF-8">
         <title>AutoPrez</title>
-        <link rel="stylesheet" type="text/css" href="../static/css/styles.css">
         <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/styles.css')}}">
+        <script defer src="{{url_for('static', filename='js/jquery-3.6.0.js')}}"></script>
+        <script defer src="{{url_for('static', filename='js/index.js')}}"></script>
     </head>
     <body>
         <div id="videos-div" class="flex" style="width: 100vw;">
             <img id="frames" class="stream" src="{{ url_for('video_feed') }}">
-            <img id="mask" class="stream" src="{{ url_for('video_feed_mask') }}" hidden>
+            <img id="mask" class="stream" src="{{ url_for('video_feed_mask') }}" style="display: none;">
         </div>
         <div class="overflow-div-outer wide neumorphic inset" id="images-div">
             <div class="overflow-div-inner" id="images-div-inner">
@@ -23,127 +24,30 @@
                 <button class="options-button flex column small-text" id="gallery-button">Gallery</button>
                 <button class="options-button flex column small-text" id="reset-servos-button">Reset Servos</button>
                 <button class="options-button flex column small-text" id="calibrate-button">Calibrate</button>
-                <button class="options-button flex column small-text" id="manual-variances-button">Show Variance Sliders</button>
                 <button class="options-button flex column small-text" id="toggle-mask-button">Toggle Mask</button>
+                <button class="options-button flex column small-text" id="toggle-sliders-button">Show Sliders</button>
                 <button class="options-button flex column small-text" id="shutdown-button">Shutdown</button>
             </div>
         </div>
-        <div id="slider-div" class="flex column wide neumorphic inset">
-            <h1 class="large-text">Variance</h1>
-            <label for="hue-variance" class="medium-text">Hue</label>
-            <input type="range" value="20" min="0" max="100" id="hue-variance" class="color-slider neumorphic">
-            <label for="saturation-variance" class="medium-text">Saturation</label>
-            <input type="range" value="50" min="0" max="100" id="saturation-variance" class="color-slider neumorphic">
-            <label for="value-variance" class="medium-text">Value</label>
-            <input type="range" value="100" min="0" max="100" id="value-variance" class="color-slider neumorphic">
+        <div id="sliders-div" class="flex row" style="display: none;">
+            <div id="target-sliders-div" class="flex column floating">
+                <h1 class="medium-text">Target</h1>
+                <label for="hue-target" class="small-text">Hue</label>
+                <input type="range" value="0" min="0" max="255" id="hue-target" class="target-slider neumorphic">
+                <label for="saturation-target" class="small-text">Saturation</label>
+                <input type="range" value="0" min="0" max="255" id="saturation-target" class="target-slider neumorphic">
+                <label for="value-target" class="small-text">Value</label>
+                <input type="range" value="0" min="0" max="255" id="value-target" class="target-slider neumorphic">
+            </div>
+            <div id="variance-sliders-div" class="flex column floating">
+                <h1 class="medium-text">Variance</h1>
+                <label for="hue-variance" class="small-text">Hue</label>
+                <input type="range" value="0" min="0" max="100" id="hue-variance" class="variance-slider neumorphic">
+                <label for="saturation-variance" class="small-text">Saturation</label>
+                <input type="range" value="0" min="0" max="100" id="saturation-variance" class="variance-slider neumorphic">
+                <label for="value-variance" class="small-text">Value</label>
+                <input type="range" value="0" min="0" max="100" id="value-variance" class="variance-slider neumorphic">
+            </div>
         </div>
-        <script src="{{url_for('static', filename='js/jquery-3.6.0.js')}}"></script>
-        <script>
-            $(document).ready(() => {
-                $.ajax({
-                    type: "GET",
-                    url: "/api/images",
-                    success: (res) => {
-                        res = JSON.parse(res)
-                        res.reverse();
-                        for (const row of res) {
-                            $('#images-div-inner').prepend(`
-                                <button class="options-button flex column small-text overlay-image-button" style="background-position: center center; background-repeat: no-repeat;background-size: contain; background-image: url('data:image/png;base64,${row.image}')" id="${row.name}">${row.name}</button>
-                            `);
-                        }
-                    }
-                });
-            });
-
-            $(document).on('click', '.overlay-image-button', (e) => {
-                console.log(e);
-                $.ajax({
-                    type: "POST",
-                    url: `/api/overlay/image/${e.target.id}`
-                });
-            });
-
-            $('.color-slider').on('input', (e) => {
-                $.ajax({
-                    type: "POST",
-                    url: "/api/set-color",
-                    data: JSON.stringify({'element': $(e.target).attr('id').split('-')[0], 'value': $(e.target).val()}),
-                    dataType: 'json',
-                    contentType: 'application/json'
-                });
-            });
-
-            $('#overlays-button').on('click', (e) => {
-                location.href='/overlays';
-            });
-
-            $('#gallery-button').on('click', (e) => {
-                location.href='/gallery';
-            });
-
-            $('#shutdown-button').on('click', (e) => {
-                $.ajax({
-                    type: "POST",
-                    url: "/api/shutdown"
-                });
-            });
-
-            $('#toggle-tracking-button').on('click', (e) => {
-                $.ajax({
-                    type: "POST",
-                    url: "/api/toggle-tracking"
-                });
-            });
-
-            $('#arrow-button').on('click', (e) => {
-                $.ajax({
-                    type: "POST",
-                    url: "/api/overlay/arrow"
-                });
-            });
-
-            $('#reset-servos-button').on('click', (e) => {
-                $.ajax({
-                    type: "POST",
-                    url: "/api/reset-servos"
-                });
-            });
-
-            $('#save-button').on('click', (e) => {
-                $.ajax({
-                    type: "POST",
-                    url: "/api/overlay/save"
-                });
-            });
-
-            $('#calibrate-button').on('click', (e) => {
-                $.ajax({
-                    type: "POST",
-                    url: "/api/calibrate",
-                    success: (res) => {
-                        if (res != "200") {
-                            slider_values = res.slice(1, -1).split(' ').map(x=>parseInt(x));
-                            console.log(slider_values);
-                            $('#hue-variance').val(slider_values[0]);
-                            $('#saturation-variance').val(slider_values[1]);
-                            $('#value-variance').val(slider_values[2]);
-                        }
-                    }
-                });
-            });
-
-            $('#toggle-mask-button').on('click', (e) => {
-                $('.stream').toggle();
-            });
-
-            $('#manual-variances-button').on('click', (e) => {
-                console.log($('#slider-div').css("display"));
-                if ($('#slider-div').css("display") == "none") {
-                    $('#slider-div').css("display", "flex");
-                } else if ($('#slider-div').css("display") == "flex") {
-                    $('#slider-div').css("display", "none");
-                }
-            });
-        </script>
     </body>
 </html>
