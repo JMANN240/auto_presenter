@@ -9,8 +9,8 @@
     </head>
     <body>
         <div id="videos-div" class="flex" style="width: 100vw;">
-            <img id="frames" class="stream" src="{{ url_for('video_feed') }}">
-            <img id="mask" class="stream" src="{{ url_for('video_feed_mask') }}" style="display: none;">
+            <img id="frames" class="stream" src="{{ url_for('api_video_feed') }}">
+            <img id="mask" class="stream" src="{{ url_for('api_video_feed_mask') }}" style="display: none;">
         </div>
         <div class="overflow-div-outer wide neumorphic inset" id="images-div">
             <div class="overflow-div-inner" id="images-div-inner">
