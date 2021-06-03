@@ -5,7 +5,12 @@ class Servo:
     hrange = (400, 2100)
 
     def __init__(self):
-        self.pwm = Adafruit_PCA9685.PCA9685()
+        try:
+            self.pwm = Adafruit_PCA9685.PCA9685()
+            self.enabled = True
+        except:
+            self.enabled = False
+            return
         self.reset()
 
     def update(self):
