@@ -1,5 +1,6 @@
 import cv2, platform
 import numpy as np
+from time import sleep
 from image_db import ImageDatabase
 from overlay_image import Overlay
 from servo import Servo
@@ -44,6 +45,7 @@ def initializeCamera():
         from picamera.array import PiRGBArray
         from picamera import PiCamera
         camera = PiCamera()
+        sleep(2)
         resolution = (480, 368)
         framerate = 30
         camera.resolution = resolution
@@ -52,4 +54,5 @@ def initializeCamera():
         frame = np.zeros((resolution[1], resolution[0], 3), np.uint8)
     else:
         camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        sleep(2)
         frame = np.zeros((int(camera.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(camera.get(cv2.CAP_PROP_FRAME_WIDTH)), 3), np.uint8)
