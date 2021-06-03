@@ -18,7 +18,7 @@ def init():
     calibration_circle_size = 0.2 # Target circle radius as a percentage of the smaller of the two frame dimensions
     target_square_size = int(min(frame.shape[0], frame.shape[1]) * target_square_size) # Calculating actual square size
     calibration_circle_size = int(min(frame.shape[0], frame.shape[1]) * calibration_circle_size) # Calculating actual circle radius
-    move_amount = 10 # How much the servo moves to reach the target square
+    move_amount = 4 # How much the servo moves to reach the target square
 
     running = True
     tracking = True
