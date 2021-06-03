@@ -20,7 +20,7 @@ AutoPrez is used to generate presentation images automatically. It is fully cust
 
 #### *Note: you will still have to manually enable the camera and I2C with raspi-config.* 
 
-#### *Note: The default SSID is "RASPINET" and the defulat password is "razzledazzle".*
+#### *Note: The default host is 192.168.4.1:8000, SSID is "RASPINET", and password is "razzledazzle".*
 
 ---
 
@@ -39,24 +39,7 @@ It is recommended to use Nginx as a reverse proxy to serve the web interface, sy
 
 #### *Note: make sure to substitute any eth0 with wlan1 if you plan on using a second wireless interface rather than ethernet*
 
-The Nginx configuration file should be located in /etc/nginx/sites-enabled and should contain something similar to 
-
-```nginx
-server {
-    listen 80;
-    server_name _;
-
-    location / {
-        proxy_pass http://localhost:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
-
-And the systemd configuration should be located in /etc/systemd/system and should contain something similar to
+The systemd configuration should be located in /etc/systemd/system and should contain something similar to
 
 ```
 [Unit]
@@ -83,4 +66,4 @@ Once the systemd config file is present, run
 
 ## Hardware/Software
 
-This project was completed on a [Raspberry Pi 4](https://www.amazon.com/gp/product/B07TXKY4Z9/ref=ppx_yo_dt_b_asin_title_o01_s00?ie=UTF8&psc=1) using a [pan-tilt camera mount](https://www.amazon.com/Arducam-Upgraded-Camera-Platform-Raspberry/dp/B08PK9N9T4/ref=sr_1_3?dchild=1&keywords=arducam+pan+tilt&qid=1622581574&sr=8-3) and the [Raspberry Pi Camera v2](https://www.amazon.com/Raspberry-Pi-Camera-Module-Megapixel/dp/B01ER2SKFS/ref=sr_1_3?dchild=1&keywords=raspberry+pi+camera+v2&qid=1622581623&sr=8-3) and runs on python 3.7.3, nginx 1.14.2, hostapd 2.8, and dnsmasq 2.8
+This project was completed on a [Raspberry Pi 4](https://www.amazon.com/gp/product/B07TXKY4Z9/ref=ppx_yo_dt_b_asin_title_o01_s00?ie=UTF8&psc=1) using a [pan-tilt camera mount](https://www.amazon.com/Arducam-Upgraded-Camera-Platform-Raspberry/dp/B08PK9N9T4/ref=sr_1_3?dchild=1&keywords=arducam+pan+tilt&qid=1622581574&sr=8-3) and the [Raspberry Pi Camera v2](https://www.amazon.com/Raspberry-Pi-Camera-Module-Megapixel/dp/B01ER2SKFS/ref=sr_1_3?dchild=1&keywords=raspberry+pi+camera+v2&qid=1622581623&sr=8-3) and runs on python 3.7.3, hostapd 2.8, and dnsmasq 2.8

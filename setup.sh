@@ -4,7 +4,7 @@
 sudo apt -y update
 
 #  Installing software
-sudo apt -y install nginx hostapd dnsmasq
+sudo apt -y install hostapd dnsmasq
 sudo DEBIAN_FRONTEND=noninteractive apt install -y netfilter-persistent iptables-persistent
 
 #  Installing dependencies
@@ -24,22 +24,6 @@ python3 -m pip install -r requirements.txt
 
 #  Setting up image database
 python3 image_db.py
-
-#  Creating nginx server block and enabling it
-sudo rm /etc/nginx/sites-enabled/default
-sudo echo "server {
-    listen 80;
-    server_name _;
-
-    location / {
-        proxy_pass http://localhost:8000;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-    }
-}" > /etc/nginx/sites-available/server
-sudo ln /etc/nginx/sites-available/server /etc/nginx/sites-enabled/
 
 #  Creating systemd unit file and enabling it
 sudo echo "[Unit]
