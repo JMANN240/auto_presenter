@@ -46,15 +46,15 @@ body {
 .large-text {
     font-size: 9rem;
     border-radius: 3rem;
-    margin: 1.5rem;
-    padding: 1.5rem;
+    margin: 0.6rem;
+    padding: 0.6rem;
 }
 
 .medium-text {
     font-size: 6rem;
     border-radius: 2rem;
-    margin: 1rem;
-    padding: 1rem;
+    margin: 0.4rem;
+    padding: 0.4rem;
 }
 
 .gallery-card p,
@@ -62,8 +62,8 @@ body {
 .small-text {
     font-size: 3rem;
     border-radius: 1rem;
-    margin: 0.5rem;
-    padding: 0.5rem;
+    margin: 0.2rem;
+    padding: 0.2rem;
 }
 
 .flex {
@@ -101,39 +101,52 @@ button {
     background-color: #00000000;
 }
 
-#slider-div {
-    display: none;
+#sliders-div {
+    width: 100vw;
+    justify-content: space-around;
 }
 
-.color-slider.neumorphic {
+#sliders-div > div {
+    width: 45vw;
+}
+
+#target-sliders-div,
+#variance-sliders-div {
+    margin: 2.5vw;
+}
+
+.target-slider,
+.variance-slider {
     -webkit-appearance: none;
     appearance: none;
     background-color: var(--prim);
     width: 90%;
     margin-bottom: 5%;
-    height: 10vw;
-    border-radius: 5vw;
+    height: 5vh;
+    border-radius: 5vh;
     box-shadow: 0.5vw 0.5vw 1vw 0em var(--prim-darker) inset, -0.5vw -0.5vw 1vw 0em var(--prim-lighter) inset;
 }
 
-.color-slider.neumorphic::-webkit-slider-thumb {
+.target-slider::-webkit-slider-thumb,
+.variance-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     box-shadow: 0.5vw 0.5vw 1vw 0em var(--prim-darker), -0.5vw -0.5vw 1vw 0em var(--prim-lighter);
     width: 5vh;
     height: 5vh;
-    border-radius: 5vw;
+    border-radius: 5vh;
     background-color: var(--prim);
     cursor: pointer;
     border: none;
 }
 
-.color-slider.neumorphic::-moz-range-thumb {
+.target-slider::-moz-range-thumb,
+.variance-slider::-moz-range-thumb {
     appearance: none;
     box-shadow: 0.5vw 0.5vw 1vw 0em var(--prim-darker), -0.5vw -0.5vw 1vw 0em var(--prim-lighter);
     width: 5vh;
     height: 5vh;
-    border-radius: 5vw;
+    border-radius: 5vh;
     background-color: var(--prim);
     cursor: pointer;
     border: none;
@@ -150,6 +163,10 @@ button {
     width: 80vw;
     border: 1px solid black; 
     border-radius: 3rem;
+}
+
+.floating {
+    box-shadow: 0.5vw 0.5vw 1vw 0em var(--prim-darker), -0.5vw -0.5vw 1vw 0em var(--prim-lighter);
 }
 
 .flash-message {
