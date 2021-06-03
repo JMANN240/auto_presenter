@@ -16,7 +16,7 @@ AutoPrez is used to generate presentation images automatically. It is fully cust
 
 ## Installation
 
-### ***To perform a quick default installation that should work on most RasPiOS Buster installations, run setup.sh. To go through the steps yourself, follow the instructions below.***
+### ***To perform a quick default installation that should work on most RasPiOS Buster installations, run `sudo bash setup.sh`. To go through the steps yourself, follow the instructions below.***
 
 #### *Note: you will still have to manually enable the camera and I2C with raspi-config.* 
 
