@@ -56,7 +56,7 @@ focus = (0, 0)
 scale = 0
 radius = 0
 
-avg_hsv = np.array((0,0,0))
+tgt_hsv = np.array((0,0,0))
 var_hsv = np.array((20,50,100))
 
 calibration_radius = int(min(frame.shape[0], frame.shape[1]) * 0.25)
@@ -66,7 +66,7 @@ overlay = Overlay()
 def generateMask(f):
     blurred = cv2.GaussianBlur(f, (11, 11), 0)
     hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
-    mask = cv2.inRange(hsv, avg_hsv - var_hsv, avg_hsv + var_hsv)
+    mask = cv2.inRange(hsv, tgt_hsv - var_hsv, tgt_hsv + var_hsv)
     mask = cv2.erode(mask, None, iterations=2)
     mask = cv2.dilate(mask, None, iterations=2)
     return mask
@@ -120,6 +120,10 @@ imdb = ImageDatabase('database.db')
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/cpy')
+def indexcpy():
+    return render_template('index copy.html')
 
 @app.route('/overlays')
 def overlays():
@@ -196,7 +200,8 @@ def video_feed_mask():
 
 @app.route('/api/reset-servos', methods=["POST"])
 def reset_servos():
-    servo.reset()
+    if servo_enabled:
+        servo.reset()
     return "200"
 
 @app.route('/api/overlay/image/<img>', methods=["POST"])
@@ -216,8 +221,19 @@ def save_overlay():
     overlay.clear()
     return "200"
 
-@app.route('/api/set-color', methods=["POST"])
-def set_color():
+@app.route('/api/set-target', methods=["POST"])
+def set_target():
+    global tgt_hsv
+    if request.json['element'] == 'hue':
+        tgt_hsv[0] = int(request.json['value'])
+    elif request.json['element'] == 'saturation':
+        tgt_hsv[1] = int(request.json['value'])
+    elif request.json['element'] == 'value':
+        tgt_hsv[2] = int(request.json['value'])
+    return "200"
+
+@app.route('/api/set-variance', methods=["POST"])
+def set_variance():
     global var_hsv
     if request.json['element'] == 'hue':
         var_hsv[0] = int(request.json['value'])
@@ -232,14 +248,22 @@ cv2.circle(circle_img,(int(frame.shape[1]/2),int(frame.shape[0]/2)),100,(255,255
 
 @app.route('/api/calibrate', methods=["POST"])
 def calibrate():
-    global avg_hsv, calibrated
+    global tgt_hsv, calibrated
     if not calibrated:
         frame_to_thresh = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        avg_hsv = np.array(cv2.mean(frame_to_thresh, mask=circle_img)[:3])
+        tgt_hsv = np.array(cv2.mean(frame_to_thresh, mask=circle_img)[:3])
         calibrated = True
     else:
         calibrated = False
     return "200"
+
+@app.route('/api/tgt-hsv', methods=["GET"])
+def get_tgt_hsv():
+    return f"{round(tgt_hsv[0])} {round(tgt_hsv[1])} {round(tgt_hsv[2])}"
+
+@app.route('/api/var-hsv', methods=["GET"])
+def get_var_hsv():
+    return f"{round(var_hsv[0])} {round(var_hsv[1])} {round(var_hsv[2])}"
 
 @app.route('/api/toggle-tracking', methods=['POST'])
 def toggle_tracking():
