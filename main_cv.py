@@ -11,9 +11,9 @@ def generateMask(f):
 
 def getFrame():
     if settings.onpi:
-        for f in settings.camera.capture_continuous(settings.rawCapture, format="bgr", use_video_port=True):
+        for f in settings.camera.capture_continuous(settings.camera_array, format="bgr", use_video_port=True, resize=settings.low_resolution):
             settings.frame = f.array
-            settings.rawCapture.truncate(0)
+            settings.camera_array.truncate(0)
             if not settings.running:
                 break
     else:

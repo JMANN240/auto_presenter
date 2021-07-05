@@ -6,6 +6,7 @@ from PIL import Image
 from base64 import b64encode
 from main_flask import app, gen_frames, gen_masks
 import main_globals as settings
+from io import BytesIO
 
 # API routes
 
@@ -85,8 +86,14 @@ def api_overlay_arrow():
 
 @app.route('/api/overlay/save', methods=["POST"])
 def api_save_overlay():
-    frame_image = Image.fromarray(np.flip(settings.frame, 2))
-    settings.overlay.draw(frame_image).save(f"static/saved_images/{round(time.time())}.png")
+    if settings.onpi:
+        stream = BytesIO()
+        settings.camera.capture(stream, format='png')
+        stream.seek(0)
+        image = Image.open(stream)
+    else:
+        image = Image.fromarray(np.flip(settings.frame, 2))
+    settings.overlay.draw(image).save(f"static/saved_images/{round(time.time())}.png")
     settings.overlay.clear()
     return "200"
 
