@@ -28,7 +28,7 @@ AutoPrez is used to generate presentation images automatically. It is fully cust
 
 #### *Note: you will still have to manually enable the camera and I2C with raspi-config.* 
 
-#### *Note: The default host is 192.168.4.1:8000, SSID is "RASPINET", and password is "razzledazzle".*
+#### *Note: The default host is 192.168.4.1:8000, SSID is "AutoPrez", and password is "razzledazzle".*
 
 ---
 
