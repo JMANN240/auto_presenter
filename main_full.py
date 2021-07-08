@@ -44,7 +44,7 @@ if onpi:
     framerate = 30
     camera.resolution = resolution
     camera.framerate = framerate
-    rawCapture = PiRGBArray(camera, size=resolution)
+    camera_array = PiRGBArray(camera, size=resolution)
     frame = np.zeros((resolution[1], resolution[0], 3), np.uint8)
 else:
     camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
@@ -74,9 +74,9 @@ def generateMask(f):
 def getFrame():
     global frame
     if onpi:
-        for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+        for f in camera.capture_continuous(camera_array, format="bgr", use_video_port=True):
             frame = f.array
-            rawCapture.truncate(0)
+            camera_array.truncate(0)
             if not running:
                 break
     else:

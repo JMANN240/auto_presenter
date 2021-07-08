@@ -8,9 +8,12 @@ from servo import Servo
 def init():
     global target_square_size, move_amount
     global running, tracking, focus, scale, radius
-    global tgt_hsv, var_hsv
+    global tgt_hsv, var_hsv, low_resolution, high_resolution
     global calibration_circle_size, calibrated, circle_img
     global imdb, overlay, servo
+
+    low_resolution = (480, 270)
+    high_resolution = (1640, 922)
 
     initializeCamera()
 
@@ -46,8 +49,6 @@ def initializeCamera():
         from picamera import PiCamera
         camera = PiCamera()
         sleep(2)
-        low_resolution = (480, 270)
-        high_resolution = (1640, 922)
         framerate = 30
         camera.resolution = high_resolution
         camera.framerate = framerate
@@ -56,4 +57,6 @@ def initializeCamera():
     else:
         camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
         sleep(2)
+        low_resolution = (int(camera.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(camera.get(cv2.CAP_PROP_FRAME_WIDTH)))
+        high_resolution = (int(camera.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(camera.get(cv2.CAP_PROP_FRAME_WIDTH)))
         frame = np.zeros((int(camera.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(camera.get(cv2.CAP_PROP_FRAME_WIDTH)), 3), np.uint8)

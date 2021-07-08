@@ -43,11 +43,11 @@ class ImageDatabase:
             cursor.execute('DELETE FROM images WHERE name=?', (name,))
             connection.commit()
 
-    def save_pil_image(self, name, image):
+    def save_pil_image(self, name, image, description=""):
         stream = io.BytesIO()
         image.save(stream, format="PNG")
         img_bytes = b64encode(stream.getvalue())
-        self.save_row(name, img_bytes)
+        self.save_row(name, img_bytes, description)
             
     def load_pil_image(self, name):
         return Image.open(io.BytesIO(b64decode(self.load_row(name)['image'])))
@@ -56,6 +56,6 @@ if (__name__ == '__main__'):
     imagesDB = ImageDatabase('database.db')
     imagesDB.reset_table()
     camera = Image.open("static/camera.png").convert("RGBA")
-    imagesDB.save_pil_image("camera", camera)
+    imagesDB.save_pil_image("MCP1", camera, "The MCP1 Security Camera is the optimal solution for all of your security needs. With a 180 degree field of view and IP capabilities this is the best camera for the modern business owner.")
     keypad = Image.open("static/keypad.png").convert("RGBA")
-    imagesDB.save_pil_image("keypad", keypad)
+    imagesDB.save_pil_image("KP3000", keypad, "The KP3000 has comfortable silicone pads and includes extra symbols for extra security. This is made of titanium and is impossible to break.")

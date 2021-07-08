@@ -76,12 +76,14 @@ def api_reset_servos():
 
 @app.route('/api/overlay/image/<img>', methods=["POST"])
 def api_overlay_image(img):
-    settings.overlay.image(img, settings.imdb, settings.focus, 4*settings.radius)
+    scaled_focus = (settings.focus[0] / settings.low_resolution[0] * settings.high_resolution[0], settings.focus[1] / settings.low_resolution[1] * settings.high_resolution[1])
+    settings.overlay.image(img, settings.imdb, scaled_focus, 4*settings.radius)
     return "200"
 
 @app.route('/api/overlay/arrow', methods=["POST"])
 def api_overlay_arrow():
-    settings.overlay.arrow(settings.focus)
+    scaled_focus = (settings.focus[0] / settings.low_resolution[0] * settings.high_resolution[0], settings.focus[1] / settings.low_resolution[1] * settings.high_resolution[1])
+    settings.overlay.arrow(scaled_focus)
     return "200"
 
 @app.route('/api/overlay/save', methods=["POST"])

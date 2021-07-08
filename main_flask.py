@@ -13,9 +13,10 @@ app.secret_key = os.urandom(24)
 def gen_frames():
     while settings.running:
         f = settings.frame.copy()
-        cv2.circle(f, settings.focus, int(settings.radius), (0, 255, 255), 2)
-        cv2.circle(f, settings.focus, 5, (0, 0, 255), -1)
-        if not settings.calibrated:
+        if settings.calibrated:
+            cv2.circle(f, settings.focus, int(settings.radius), (0, 255, 255), 2)
+            cv2.circle(f, settings.focus, 5, (0, 0, 255), -1)
+        else:
             cv2.circle(f,(int(f.shape[1]/2),int(f.shape[0]/2)),settings.calibration_circle_size,(0,0,255),3)
         w = f.shape[1]
         h = f.shape[0]
