@@ -83,7 +83,7 @@ address=/gw.wlan/192.168.4.1
 sudo rfkill unblock wlan
 echo "country_code=US
 interface=wlan0
-ssid=RASPINET
+ssid=AutoPrez
 hw_mode=g
 channel=7
 macaddr_acl=0
