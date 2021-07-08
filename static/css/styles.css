@@ -1,4 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,700;1,400&display=swap');
+@font-face {
+    font-family: "Roboto";
+    src: url("/static/roboto/roboto-regular.woff") format("woff");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("/static/roboto/roboto-thin.woff") format("woff");
+    font-weight: 100;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("/static/roboto/roboto-bold.woff") format("woff");
+    font-weight: 700;
+}
 
 :root {
     --prim: #EFEFEF;
@@ -40,31 +56,99 @@ body {
     border-radius: 1vw;
     width: 30vw;
     min-height: 10vh;
+    font-weight: 100;
 }
 
-.gallery-card h1,
-.large-text {
-    font-size: 9rem;
-    border-radius: 3rem;
-    margin: 0.6rem;
-    padding: 0.6rem;
+@media (orientation: portrait) {
+    .gallery-card h1,
+    .large-text {
+        font-size: 18vw;
+        border-radius: 3vw;
+        margin: 0.6rem;
+        padding: 0.6rem;
+    }
+    
+    .medium-text {
+        font-size: 12vw;
+        border-radius: 2vw;
+        margin: 0.4rem;
+        padding: 0.4rem;
+    }
+    
+    .gallery-card p,
+    .gallery-card button,
+    .small-text {
+        font-size: 6vw;
+        border-radius: 1vw;
+        margin: 0.2rem;
+        padding: 0.2rem;
+    }
+
+    .gallery-card {
+        border: 1px solid black; 
+        border-radius: 3vw; 
+        width: 90vw;
+        margin: 3rem;
+        padding: 1vw;
+    }
+    
+    .gallery-card img {
+        width: 80vw;
+        border: 1px solid black; 
+        border-radius: 3vw;
+    }
 }
 
-.medium-text {
-    font-size: 6rem;
-    border-radius: 2rem;
-    margin: 0.4rem;
-    padding: 0.4rem;
+@media (orientation: landscape) {
+    .gallery-card h1,
+    .large-text {
+        font-size: 3vw;
+        border-radius: 1.25vw;
+        margin: 0.6rem;
+        padding: 0.6rem;
+    }
+    
+    .medium-text {
+        font-size: 2vw;
+        border-radius: 0.5vw;
+        margin: 0.4rem;
+        padding: 0.4rem;
+    }
+    
+    .gallery-card p,
+    .gallery-card button,
+    .small-text {
+        font-size: 1vw;
+        border-radius: 0.25vw;
+        margin: 0.2rem;
+        padding: 0.2rem;
+    }
+
+    .options-button.small-text {
+        font-size: 3vw;
+        border-radius: 1.25vw;
+    }
+
+    .gallery-card {
+        border: 1px solid black; 
+        border-radius: 1vw; 
+        width: fit-content;
+        margin: 3rem;
+        padding: 1vw;
+    }
+    
+    .gallery-card img {
+        width: 30vw;
+        border: 1px solid black; 
+        border-radius: 1vw;
+    }
+    
+    .gallery-card p {
+        width: 30vw;
+    }
 }
 
-.gallery-card p,
-.gallery-card button,
-.small-text {
-    font-size: 3rem;
-    border-radius: 1rem;
-    margin: 0.2rem;
-    padding: 0.2rem;
-}
+
 
 .flex {
     display: flex;
@@ -150,19 +234,6 @@ button {
     background-color: var(--prim);
     cursor: pointer;
     border: none;
-}
-
-.gallery-card {
-    border: 1px solid black; 
-    border-radius: 3rem; 
-    width: 90vw;
-    margin: 3rem;
-}
-
-.gallery-card img {
-    width: 80vw;
-    border: 1px solid black; 
-    border-radius: 3rem;
 }
 
 .floating {
